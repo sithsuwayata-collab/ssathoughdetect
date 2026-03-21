@@ -6,32 +6,57 @@
 <title>Thought Detective</title>
 
 <style>
-body { font-family: Arial; margin:0; display:flex; }
-
-/* LOG PANEL */
-.log {
-    width:260px;
-    background:#1f2d3d;
-    color:white;
-    padding:10px;
-    overflow:auto;
-    height:100vh;
+body {
+    margin:0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#6C8CF5,#A084E8);
+    display:flex;
+    justify-content:center;
 }
 
-/* MAIN */
-.main {
-    flex:1;
-    padding:15px;
+/* APP CONTAINER */
+.app {
+    width:100%;
+    max-width:500px;
+    min-height:100vh;
     background:#f4f6f9;
-    text-align:center;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    overflow:hidden;
 }
 
+/* HEADER */
+.header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 16px;
+    background:white;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.icon-btn {
+    font-size:20px;
+    cursor:pointer;
+}
+
+/* CARD */
 .card {
     background:white;
+    margin:15px;
     padding:20px;
-    border-radius:12px;
-    max-width:600px;
-    margin:auto;
+    border-radius:16px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* TIMER */
+.timer {
+    background:#e9ecef;
+    display:inline-block;
+    padding:6px 12px;
+    border-radius:20px;
+    margin-bottom:10px;
 }
 
 /* BUTTONS */
@@ -40,88 +65,102 @@ button {
     padding:14px;
     margin:8px 0;
     border:none;
-    border-radius:10px;
+    border-radius:12px;
     background:#2c7be5;
     color:white;
     font-size:16px;
     cursor:pointer;
-    transition: all 0.2s ease;
+    transition:0.2s;
 }
 
-button:hover { background:#888; }
 button:active { transform:scale(0.96); }
+button.correct { background:#28a745; }
+button.wrong { background:#dc3545; }
 
-button.correct { background:#28a745 !important; }
-button.wrong { background:#dc3545 !important; }
-
-/* SMALL NEXT BUTTON */
 .next-btn {
-    width:auto;
-    padding:8px 16px;
     background:#6c757d;
-    font-size:14px;
 }
 
-/* CIRCLE BUTTON */
-.circle-btn {
-    width:60px;
-    height:60px;
-    border-radius:50%;
-    background:#17a2b8;
+/* LOG PANEL */
+.log-panel {
+    position:absolute;
+    top:0;
+    right:-260px;
+    width:260px;
+    height:100%;
+    background:#1f2d3d;
     color:white;
-    font-size:20px;
-    display:flex;
-    align-items:center;
+    padding:10px;
+    transition:0.3s;
+    overflow:auto;
+    z-index:10;
+}
+
+.log-panel.open {
+    right:0;
+}
+
+/* BREATHING SCREEN */
+.breathing {
+    position:absolute;
+    inset:0;
+    background:#000000cc;
+    display:none;
+    flex-direction:column;
     justify-content:center;
-    margin:15px auto;
-    cursor:pointer;
-    transition: all 0.2s ease;
+    align-items:center;
+    z-index:20;
 }
 
-.circle-btn:hover { background:#138496; }
-.circle-btn:active { transform:scale(0.9); }
+.circle {
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    background:#7ED7C1;
+    animation: breathe 8s infinite;
+}
 
-.reflection {
+@keyframes breathe {
+    0% { transform:scale(1); }
+    25% { transform:scale(1.4); }
+    50% { transform:scale(1.4); }
+    75% { transform:scale(1); }
+    100% { transform:scale(1); }
+}
+
+.breath-text {
+    color:white;
+    margin-top:20px;
+    font-size:18px;
+}
+
+/* FOOTER */
+.footer {
+    text-align:center;
+    padding:10px;
     font-size:14px;
-    color:#444;
-    margin-top:10px;
-    font-style:italic;
 }
 
-hr { border:0.5px solid #444; }
-
-.log-item { font-size:13px; margin-bottom:6px; }
 </style>
 </head>
 
 <body>
 
-<!-- LOG -->
-<div class="log">
-<h3>Session Log</h3>
-<div id="logItems"></div>
-<hr>
-<p>Start: <span id="startTime">-</span></p>
-<p>End: <span id="endTime">-</span></p>
-<p>Accuracy: <span id="finalAccuracy">0%</span></p>
+<div class="app">
+
+<!-- HEADER -->
+<div class="header">
+<div>🧠 Thought Detective</div>
+<div class="icon-btn" onclick="toggleLog()">📊</div>
 </div>
 
 <!-- MAIN -->
-<div class="main">
-
-<!-- LOGO -->
-<div style="text-align:center; margin-bottom:10px;">
-<img src="logo.png" style="height:70px;">
-</div>
-
-<h2>Thought Detective</h2>
-
 <div class="card">
+
+<div class="timer" id="timer">⏱ 15</div>
 
 <h3 id="scenario"></h3>
 <h4 id="step"></h4>
-
-<div id="timer"></div>
 
 <div id="options"></div>
 
@@ -130,17 +169,34 @@ hr { border:0.5px solid #444; }
 
 <button class="next-btn" onclick="next()">Next →</button>
 
-<p>Score: <span id="score">0</span></p>
-<p>Accuracy: <span id="accuracy">0%</span></p>
+</div>
 
+<div class="footer">
+Score: <span id="score">0</span> | Accuracy: <span id="accuracy">0%</span>
+</div>
+
+<!-- LOG PANEL -->
+<div class="log-panel" id="logPanel">
+<h3>Session</h3>
+<div id="logItems"></div>
+<hr>
+<p>Start: <span id="startTime">-</span></p>
+<p>End: <span id="endTime">-</span></p>
+<p>Accuracy: <span id="finalAccuracy">0%</span></p>
+</div>
+
+<!-- BREATHING -->
+<div class="breathing" id="breathing">
+<div class="circle"></div>
+<div class="breath-text" id="breathText">Breathe In</div>
 </div>
 
 </div>
 
 <script>
 
-// ===== SAFE WORKING SCENARIOS =====
-const scenarios = [
+/* DATA (shortened for demo, you can paste full set) */
+const scenarios=[
 { id:1, text:"My friend didn’t reply to my message all day.", distortion:"Mind Reading", thought:"They might be busy or distracted." },
 { id:2, text:"I failed an important exam I studied for.", distortion:"Catastrophizing", thought:"This is one setback. I can improve." },
 { id:3, text:"My parents keep asking why I am not married yet.", distortion:"Personalization", thought:"They are concerned, not judging my worth." },
@@ -263,181 +319,175 @@ const scenarios = [
 
 ];
 
-// ===== EXPLANATIONS =====
-const explainMap = {
-"Mind Reading":"Assuming what others think without evidence.",
-"Catastrophizing":"Expecting the worst outcome.",
-"Overgeneralization":"One event defines everything.",
-"Emotional Reasoning":"Feelings = facts.",
-"Personalization":"Blaming yourself unnecessarily.",
-"Labeling":"Giving yourself a negative identity.",
-"Black & White Thinking":"All or nothing thinking.",
-"Fortune Telling":"Predicting negative future."
+const explainMap={
+"Mind Reading":"Assuming what others think.",
+"Catastrophizing":"Expecting the worst."
 };
 
-// ===== STATE =====
-let deck=[...scenarios];
-let index=0, step=1, score=0, total=0;
+/* STATE */
+let index=0, score=0, total=0;
 let current, timer, timeLeft=15;
 let startTime=null;
 
-// ===== NEXT =====
+/* TOGGLE LOG */
+function toggleLog(){
+document.getElementById("logPanel").classList.toggle("open");
+}
+
+/* NEXT */
 function next(){
 
-    if(!startTime){
-        startTime=new Date();
-        document.getElementById("startTime").innerText=startTime.toLocaleTimeString();
-    }
-
-    current = deck[index % deck.length];
-    index++;
-
-    clearInterval(timer);
-    step=1;
-
-    document.getElementById("scenario").innerText =
-    "Case "+current.id+": "+current.text;
-
-    load();
-    startTimer();
+if(!startTime){
+startTime=new Date();
+document.getElementById("startTime").innerText=startTime.toLocaleTimeString();
 }
 
-// ===== TIMER =====
+current=scenarios[index%scenarios.length];
+index++;
+
+load();
+startTimer();
+}
+
+/* TIMER */
 function startTimer(){
-    timeLeft=15;
-    document.getElementById("timer").innerText="⏱ "+timeLeft;
+timeLeft=15;
+document.getElementById("timer").innerText="⏱ "+timeLeft;
 
-    timer=setInterval(()=>{
-        timeLeft--;
-        document.getElementById("timer").innerText="⏱ "+timeLeft;
+timer=setInterval(()=>{
+timeLeft--;
+document.getElementById("timer").innerText="⏱ "+timeLeft;
 
-        if(timeLeft<=0){
-            clearInterval(timer);
-            autoFail();
-        }
-    },1000);
+if(timeLeft<=0){
+clearInterval(timer);
+fail();
+}
+},1000);
 }
 
-function autoFail(){
-    document.getElementById("feedback").innerText="Time up!";
-    log(false);
-    total++;
-    updateStats();
-}
-
-// ===== LOAD =====
+/* LOAD */
 function load(){
-    document.getElementById("options").innerHTML="";
-    document.getElementById("feedback").innerText="";
-    document.getElementById("explain").innerText="";
+document.getElementById("scenario").innerText=current.text;
+document.getElementById("options").innerHTML="";
+document.getElementById("feedback").innerText="";
+document.getElementById("explain").innerText="";
+document.getElementById("step").innerText="Find the thinking trap";
 
-    document.getElementById("step").innerText="Find the thinking trap";
-
-    show(Object.keys(explainMap), checkD);
+Object.keys(explainMap).forEach(opt=>{
+let b=document.createElement("button");
+b.innerText=opt;
+b.onclick=()=>checkD(b,opt);
+options.appendChild(b);
+});
 }
 
-// ===== SHOW =====
-function show(arr, fn){
-    const container=document.getElementById("options");
-
-    arr.forEach(option=>{
-        let btn=document.createElement("button");
-        btn.innerText=option;
-        btn.onclick=function(){ fn(btn,option); };
-        container.appendChild(btn);
-    });
-}
-
-// ===== CHECK DISTORTION =====
+/* CHECK DISTORTION */
 function checkD(btn,val){
-    disable();
+disable();
 
-    if(val===current.distortion){
-        btn.classList.add("correct");
+if(val===current.distortion){
+btn.classList.add("correct");
+document.getElementById("feedback").innerText="Correct";
+document.getElementById("explain").innerText=explainMap[val];
 
-        document.getElementById("feedback").innerText="Correct";
-        document.getElementById("explain").innerText=explainMap[val];
-
-        let r=document.createElement("div");
-        r.className="reflection";
-        r.innerText="What is a healthier way to think?";
-
-        document.getElementById("options").appendChild(r);
-
-        let circle=document.createElement("div");
-        circle.className="circle-btn";
-        circle.innerText="➜";
-
-        circle.onclick=function(){
-            show([
-                current.thought,
-                "This is terrible",
-                "I can't handle this"
-            ], checkT);
-        };
-
-        document.getElementById("options").appendChild(circle);
-
-    } else {
-        btn.classList.add("wrong");
-        document.getElementById("feedback").innerText="Not correct";
-        log(false);
-        total++;
-        updateStats();
-    }
+showThought();
+}else{
+btn.classList.add("wrong");
+fail();
+}
 }
 
-// ===== CHECK THOUGHT =====
+/* THOUGHT STEP */
+function showThought(){
+let div=document.getElementById("options");
+
+let circle=document.createElement("div");
+circle.style="margin:20px;font-size:30px;cursor:pointer";
+circle.innerText="➜";
+
+circle.onclick=()=>{
+div.innerHTML="";
+[current.thought,"Worst case","I can't handle"].forEach(t=>{
+let b=document.createElement("button");
+b.innerText=t;
+b.onclick=()=>checkT(b,t);
+div.appendChild(b);
+});
+};
+
+div.appendChild(circle);
+}
+
+/* CHECK THOUGHT */
 function checkT(btn,val){
-    disable();
-    clearInterval(timer);
+disable();
+clearInterval(timer);
 
-    if(val===current.thought){
-        btn.classList.add("correct");
-        document.getElementById("feedback").innerText =
-        "✔ Healthy thinking: "+current.thought;
-        score++;
-        log(true);
-    } else {
-        btn.classList.add("wrong");
-        document.getElementById("feedback").innerText =
-        "Better thought: "+current.thought;
-        log(false);
-    }
-
-    document.getElementById("explain").innerText =
-    "How would this change your feelings or actions?";
-
-    total++;
-    updateStats();
+if(val===current.thought){
+btn.classList.add("correct");
+score++;
+log(true);
+}else{
+btn.classList.add("wrong");
+log(false);
 }
 
-// ===== UTIL =====
+total++;
+updateStats();
+showBreathing();
+}
+
+/* FAIL */
+function fail(){
+document.getElementById("feedback").innerText="Time up or incorrect";
+total++;
+log(false);
+updateStats();
+showBreathing();
+}
+
+/* BREATHING */
+function showBreathing(){
+let b=document.getElementById("breathing");
+let text=document.getElementById("breathText");
+
+b.style.display="flex";
+
+let steps=["Breathe In","Hold","Breathe Out","Hold"];
+let i=0;
+
+let interval=setInterval(()=>{
+text.innerText=steps[i%4];
+i++;
+},2000);
+
+setTimeout(()=>{
+clearInterval(interval);
+b.style.display="none";
+},8000);
+}
+
+/* UTIL */
 function disable(){
-    document.querySelectorAll("#options button")
-    .forEach(b=>b.disabled=true);
+document.querySelectorAll("button").forEach(b=>b.disabled=true);
 }
 
 function updateStats(){
-    document.getElementById("score").innerText=score;
-
-    let acc = total>0 ? Math.round((score/total)*100) : 0;
-    document.getElementById("accuracy").innerText=acc+"%";
-    document.getElementById("finalAccuracy").innerText=acc+"%";
-
-    document.getElementById("endTime").innerText =
-    new Date().toLocaleTimeString();
+document.getElementById("score").innerText=score;
+let acc=Math.round((score/total)*100);
+document.getElementById("accuracy").innerText=acc+"%";
+document.getElementById("finalAccuracy").innerText=acc+"%";
+document.getElementById("endTime").innerText=new Date().toLocaleTimeString();
 }
 
 function log(ok){
-    let d=document.createElement("div");
-    d.className="log-item";
-    d.style.color= ok ? "#4caf50":"#ff6b6b";
-    d.innerText="Case "+current.id+" - "+(ok?"Correct":"Wrong");
-    document.getElementById("logItems").prepend(d);
+let d=document.createElement("div");
+d.style.color=ok?"#4caf50":"#ff6b6b";
+d.innerText="Case "+current.id+" - "+(ok?"Correct":"Wrong");
+document.getElementById("logItems").prepend(d);
 }
 
-// START
+/* START */
 next();
 
 </script>
