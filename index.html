@@ -339,6 +339,7 @@ startTime=new Date();
 document.getElementById("startTime").innerText=startTime.toLocaleTimeString();
 }
 
+/* reshuffle when done */
 if(index>=deck.length){
 shuffleDeck();
 }
@@ -430,6 +431,17 @@ document.getElementById("explain").innerText=explainMap[current.distortion];
 
 total++;
 updateStats();
+
+/* 👉 AUTO NEXT AFTER 2 SECONDS */
+setTimeout(()=>{
+    if(!sessionEnded) next();
+},3000);
+}
+
+document.getElementById("explain").innerText=explainMap[current.distortion];
+
+total++;
+updateStats();
 }
 
 /* FAIL */
@@ -438,9 +450,15 @@ if(sessionEnded) return;
 
 document.getElementById("feedback").innerText="Time up! Correct: "+current.distortion;
 document.getElementById("explain").innerText=explainMap[current.distortion];
+
 total++;
 log(false);
 updateStats();
+
+/* 👉 AUTO NEXT */
+setTimeout(()=>{
+    if(!sessionEnded) next();
+},3000);
 }
 
 /* UTIL */
