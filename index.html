@@ -136,21 +136,27 @@ button.wrong { background:#dc3545; }
 
 </div>
 
-<div class="footer">
-Score: <span id="score">0</span> | 
-Answered: <span id="answered">0</span> | 
-Accuracy: <span id="accuracy">0%</span>
-</div>
+
 
 <div class="log-panel" id="logPanel">
+
 <div class="close-btn" onclick="toggleLog()">✖</div>
+
 <h3>Session</h3>
+
+<!-- NEW SCORE CARD -->
+<div style="background:#2f3e52; padding:10px; border-radius:10px; margin-bottom:10px;">
+<p>Score: <span id="score">0</span></p>
+<p>Answered: <span id="answered">0</span></p>
+<p>Accuracy: <span id="accuracy">0%</span></p>
+</div>
+
 <div id="logItems"></div>
+
 <hr>
+
 <p>Start: <span id="startTime">-</span></p>
 <p>End: <span id="endTime">-</span></p>
-<p>Accuracy: <span id="finalAccuracy">0%</span></p>
-</div>
 
 </div>
 
@@ -421,9 +427,8 @@ document.querySelectorAll("#options button").forEach(b=>b.disabled=true);
 }
 
 function updateStats(){
-    document.getElementById("score").innerText = score;
 
-    // NEW LINE
+    document.getElementById("score").innerText = score;
     document.getElementById("answered").innerText = total;
 
     let acc = total > 0 ? Math.round((score / total) * 100) : 0;
