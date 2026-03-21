@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thought Detective</title>
+
+<style>
+body { font-family: Arial; margin:0; display:flex; }
+
+/* LOG PANEL */
+.log {
+    width:260px;
+    background:#1f2d3d;
+    color:white;
+    padding:10px;
+    overflow:auto;
+    height:100vh;
+}
+
+/* MAIN */
+.main {
+    flex:1;
+    padding:15px;
+    background:#f4f6f9;
+    text-align:center;
+}
+
+.card {
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    max-width:600px;
+    margin:auto;
+}
+
+/* BUTTONS */
+button {
+    width:100%;
+    padding:14px;
+    margin:8px 0;
+    border:none;
+    border-radius:10px;
+    background:#2c7be5;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    transition: all 0.2s ease;
+}
+
+button:hover { background:#888; }
+button:active { transform:scale(0.96); }
+
+button.correct { background:#28a745 !important; }
+button.wrong { background:#dc3545 !important; }
+
+/* SMALL NEXT BUTTON */
+.next-btn {
+    width:auto;
+    padding:8px 16px;
+    background:#6c757d;
+    font-size:14px;
+}
+
+/* CIRCLE BUTTON */
+.circle-btn {
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    background:#17a2b8;
+    color:white;
+    font-size:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:15px auto;
+    cursor:pointer;
+    transition: all 0.2s ease;
+}
+
+.circle-btn:hover { background:#138496; }
+.circle-btn:active { transform:scale(0.9); }
+
+.reflection {
+    font-size:14px;
+    color:#444;
+    margin-top:10px;
+    font-style:italic;
+}
+
+hr { border:0.5px solid #444; }
+
+.log-item { font-size:13px; margin-bottom:6px; }
+</style>
+</head>
+
+<body>
+
+<!-- LOG -->
+<div class="log">
+<h3>Session Log</h3>
+<div id="logItems"></div>
+<hr>
+<p>Start: <span id="startTime">-</span></p>
+<p>End: <span id="endTime">-</span></p>
+<p>Accuracy: <span id="finalAccuracy">0%</span></p>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- LOGO -->
+<div style="text-align:center; margin-bottom:10px;">
+<img src="logo.png" style="height:70px;">
+</div>
+
+<h2>Thought Detective</h2>
+
+<div class="card">
+
+<h3 id="scenario"></h3>
+<h4 id="step"></h4>
+
+<div id="timer"></div>
+
+<div id="options"></div>
+
+<p id="feedback"></p>
+<p id="explain"></p>
+
+<button class="next-btn" onclick="next()">Next →</button>
+
+<p>Score: <span id="score">0</span></p>
+<p>Accuracy: <span id="accuracy">0%</span></p>
+
+</div>
+
+</div>
+
+<script>
+
+// ===== SAFE WORKING SCENARIOS =====
+const scenarios = [
+{ id:1, text:"My friend didn’t reply to my message all day.", distortion:"Mind Reading", thought:"They might be busy or distracted." },
+{ id:2, text:"I failed an important exam I studied for.", distortion:"Catastrophizing", thought:"This is one setback. I can improve." },
+{ id:3, text:"My parents keep asking why I am not married yet.", distortion:"Personalization", thought:"They are concerned, not judging my worth." },
+{ id:4, text:"My partner was quiet the whole evening.", distortion:"Mind Reading", thought:"They may be tired or stressed." },
+{ id:5, text:"I made a mistake during a meeting at work.", distortion:"Overgeneralization", thought:"Everyone makes mistakes sometimes." },
+
+{ id:6, text:"I feel lonely after moving away from my family.", distortion:"Emotional Reasoning", thought:"Feeling lonely does not mean I am alone forever." },
+{ id:7, text:"My relatives compared me to someone more successful.", distortion:"Labeling", thought:"I have my own path and pace." },
+{ id:8, text:"I couldn’t send money home this month.", distortion:"Catastrophizing", thought:"This is temporary and I can manage next time." },
+{ id:9, text:"My partner forgot an important date.", distortion:"Mind Reading", thought:"It may be forgetfulness, not lack of care." },
+{ id:10, text:"I feel nervous speaking up at work.", distortion:"Emotional Reasoning", thought:"Nervousness is normal and I can still try." },
+
+{ id:11, text:"My child is not listening to me lately.", distortion:"Personalization", thought:"Children test limits. It is not about my failure." },
+{ id:12, text:"I didn’t get selected for a job I wanted.", distortion:"Fortune Telling", thought:"Another opportunity will come." },
+{ id:13, text:"My friend stopped texting me as much.", distortion:"Mind Reading", thought:"They may be busy or dealing with something." },
+{ id:14, text:"I gained weight recently.", distortion:"Labeling", thought:"My body changes and I can take healthy steps." },
+{ id:15, text:"I argued with my spouse this morning.", distortion:"Catastrophizing", thought:"Arguments happen and we can resolve it." },
+
+{ id:16, text:"I feel behind compared to others my age.", distortion:"Overgeneralization", thought:"Everyone’s journey is different." },
+{ id:17, text:"My parents expect me to support the family financially.", distortion:"Catastrophizing", thought:"I can help in ways that are manageable." },
+{ id:18, text:"I made a mistake in front of my supervisor.", distortion:"Mind Reading", thought:"They may not see it as seriously as I think." },
+{ id:19, text:"My partner seems distant these days.", distortion:"Mind Reading", thought:"They may be dealing with stress." },
+{ id:20, text:"I feel overwhelmed with responsibilities.", distortion:"Emotional Reasoning", thought:"I can take things one step at a time." },
+
+{ id:21, text:"My immigration status feels uncertain.", distortion:"Catastrophizing", thought:"I can focus on what I can control." },
+{ id:22, text:"I didn’t meet my savings goal this month.", distortion:"Overgeneralization", thought:"Progress is still progress." },
+{ id:23, text:"My child’s grades dropped recently.", distortion:"Personalization", thought:"There may be other factors affecting them." },
+{ id:24, text:"I feel judged in social gatherings.", distortion:"Mind Reading", thought:"People are usually focused on themselves." },
+{ id:25, text:"I forgot to call my parents.", distortion:"Labeling", thought:"I can call them later and reconnect." },
+
+{ id:26, text:"My spouse criticized something I did.", distortion:"Catastrophizing", thought:"This is one issue, not everything." },
+{ id:27, text:"I feel anxious about the future.", distortion:"Fortune Telling", thought:"The future is uncertain for everyone." },
+{ id:28, text:"My coworker didn’t greet me today.", distortion:"Mind Reading", thought:"They may be distracted or busy." },
+{ id:29, text:"I didn’t cook well today.", distortion:"Labeling", thought:"I can improve next time." },
+{ id:30, text:"I feel exhausted most days.", distortion:"Emotional Reasoning", thought:"I can rest and take small steps." },
+
+{ id:31, text:"My family expects me to visit more often.", distortion:"Personalization", thought:"They miss me, but I can set boundaries." },
+{ id:32, text:"I didn’t finish my to-do list.", distortion:"Black & White Thinking", thought:"I still completed important tasks." },
+{ id:33, text:"My friend cancelled plans last minute.", distortion:"Mind Reading", thought:"Something may have come up." },
+{ id:34, text:"I feel like I am not achieving enough.", distortion:"Overgeneralization", thought:"I am making progress step by step." },
+{ id:35, text:"I had a tense conversation with my partner.", distortion:"Catastrophizing", thought:"We can talk again and work through it." },
+
+{ id:36, text:"Relatives keep commenting on my life choices.", distortion:"Personalization", thought:"Their opinions do not define me." },
+{ id:37, text:"I am not earning as much as others.", distortion:"Labeling", thought:"My journey is different." },
+{ id:38, text:"I feel nervous meeting new people.", distortion:"Emotional Reasoning", thought:"This is normal and will get easier." },
+{ id:39, text:"My manager gave me feedback.", distortion:"Catastrophizing", thought:"Feedback helps me grow." },
+{ id:40, text:"I missed an important deadline.", distortion:"Overgeneralization", thought:"I can plan better next time." },
+
+{ id:41, text:"My partner didn’t reply to my message.", distortion:"Mind Reading", thought:"They may be busy." },
+{ id:42, text:"I feel disconnected from my culture.", distortion:"Catastrophizing", thought:"I can reconnect in small ways." },
+{ id:43, text:"I didn’t do well in an interview.", distortion:"Fortune Telling", thought:"There will be other chances." },
+{ id:44, text:"I feel like a burden to my family.", distortion:"Labeling", thought:"I contribute in many ways." },
+{ id:45, text:"I had an awkward moment in a conversation.", distortion:"Overgeneralization", thought:"It is just one moment." },
+
+{ id:46, text:"I couldn’t help my family financially this month.", distortion:"Catastrophizing", thought:"I can help in other ways too." },
+{ id:47, text:"My spouse seems upset but won’t talk.", distortion:"Mind Reading", thought:"I can ask calmly instead of assuming." },
+{ id:48, text:"I feel stressed about paying bills.", distortion:"Catastrophizing", thought:"I can take it step by step." },
+{ id:49, text:"I made a mistake while parenting.", distortion:"Labeling", thought:"I am learning as a parent." },
+{ id:50, text:"My friend didn’t invite me to an event.", distortion:"Personalization", thought:"It may not be about me." },
+
+{ id:51, text:"I feel like I am falling behind in life.", distortion:"Overgeneralization", thought:"Everyone moves at their own pace." },
+{ id:52, text:"My English is not perfect.", distortion:"Black & White Thinking", thought:"I communicate well enough and improve daily." },
+{ id:53, text:"I worry about my future career.", distortion:"Fortune Telling", thought:"I can focus on present actions." },
+{ id:54, text:"My partner disagreed with me strongly.", distortion:"Catastrophizing", thought:"Disagreement is normal in relationships." },
+{ id:55, text:"I feel exhausted balancing work and family.", distortion:"Emotional Reasoning", thought:"I can rest and adjust my pace." },
+
+{ id:56, text:"My parents compare me to relatives.", distortion:"Personalization", thought:"Their expectations are not my identity." },
+{ id:57, text:"I made a mistake cooking dinner.", distortion:"Labeling", thought:"It is a learning moment." },
+{ id:58, text:"I didn’t save enough money this year.", distortion:"Catastrophizing", thought:"I can start again." },
+{ id:59, text:"My child is struggling in school.", distortion:"Catastrophizing", thought:"We can support and improve gradually." },
+{ id:60, text:"I feel isolated in a new place.", distortion:"Emotional Reasoning", thought:"I can build connections slowly." },
+
+{ id:61, text:"I didn’t meet expectations at work.", distortion:"Overgeneralization", thought:"I can improve with effort." },
+{ id:62, text:"My partner forgot something important.", distortion:"Mind Reading", thought:"It may not mean they don’t care." },
+{ id:63, text:"I feel judged when I speak.", distortion:"Mind Reading", thought:"People are focused on themselves." },
+{ id:64, text:"I missed a family gathering.", distortion:"Personalization", thought:"It happens sometimes." },
+{ id:65, text:"I feel like I am failing in life.", distortion:"Labeling", thought:"I am still trying and growing." },
+
+{ id:66, text:"I had a disagreement with my parents.", distortion:"Catastrophizing", thought:"We can understand each other later." },
+{ id:67, text:"I feel uncertain about my career path.", distortion:"Fortune Telling", thought:"I can explore options gradually." },
+{ id:68, text:"I made a mistake in public.", distortion:"Overgeneralization", thought:"People will forget quickly." },
+{ id:69, text:"I feel overwhelmed by expectations.", distortion:"Emotional Reasoning", thought:"I can prioritize what matters." },
+{ id:70, text:"I didn’t reach my monthly goal.", distortion:"Catastrophizing", thought:"I can try again next month." },
+
+{ id:71, text:"My spouse didn’t agree with my decision.", distortion:"Mind Reading", thought:"We can discuss and understand each other." },
+{ id:72, text:"I feel like giving up today.", distortion:"Emotional Reasoning", thought:"This feeling will pass." },
+{ id:73, text:"My friend seems distant lately.", distortion:"Mind Reading", thought:"They may be busy or stressed." },
+{ id:74, text:"I am not where I expected to be in life.", distortion:"Overgeneralization", thought:"Life paths are different." },
+{ id:75, text:"I feel stressed about responsibilities.", distortion:"Catastrophizing", thought:"I can manage one step at a time." },
+
+{ id:76, text:"I was ignored in a group conversation.", distortion:"Mind Reading", thought:"They may not have noticed me." },
+{ id:77, text:"I forgot something important at work.", distortion:"Labeling", thought:"I can correct it and learn." },
+{ id:78, text:"I feel like others are doing better than me.", distortion:"Overgeneralization", thought:"I only see part of their story." },
+{ id:79, text:"My partner didn’t appreciate my effort.", distortion:"Mind Reading", thought:"They may not have realized it." },
+{ id:80, text:"I feel anxious about making a decision.", distortion:"Emotional Reasoning", thought:"I can take time and think clearly." },
+
+{ id:81, text:"I had a disagreement with a friend.", distortion:"Catastrophizing", thought:"We can repair the relationship." },
+{ id:82, text:"I made a mistake while driving.", distortion:"Overgeneralization", thought:"It was one moment, not everything." },
+{ id:83, text:"I feel like I am not good enough.", distortion:"Labeling", thought:"I have strengths and can grow." },
+{ id:84, text:"Someone didn’t respond to my call.", distortion:"Mind Reading", thought:"They may be busy." },
+{ id:85, text:"I feel overwhelmed starting something new.", distortion:"Emotional Reasoning", thought:"Starting is always challenging." },
+
+{ id:86, text:"I didn’t perform well today.", distortion:"Overgeneralization", thought:"Tomorrow is another chance." },
+{ id:87, text:"My boss didn’t praise my work.", distortion:"Mind Reading", thought:"They may expect consistency." },
+{ id:88, text:"I feel stressed about money.", distortion:"Catastrophizing", thought:"I can take small steps to manage it." },
+{ id:89, text:"I made a mistake in a conversation.", distortion:"Overgeneralization", thought:"People will likely forget." },
+{ id:90, text:"I feel like things will never improve.", distortion:"Fortune Telling", thought:"Situations can change over time." },
+
+{ id:91, text:"I wasn’t included in a decision.", distortion:"Personalization", thought:"There may be other reasons." },
+{ id:92, text:"I feel tired and unmotivated.", distortion:"Emotional Reasoning", thought:"Rest can help me recover." },
+{ id:93, text:"I didn’t achieve what I planned today.", distortion:"Black & White Thinking", thought:"Partial progress still matters." },
+{ id:94, text:"My partner seemed annoyed.", distortion:"Mind Reading", thought:"I can check instead of assuming." },
+{ id:95, text:"I feel like I am wasting time.", distortion:"Labeling", thought:"I am still learning and growing." },
+
+{ id:96, text:"I didn’t get immediate results from my effort.", distortion:"Catastrophizing", thought:"Progress takes time." },
+{ id:97, text:"I feel like I am not respected.", distortion:"Mind Reading", thought:"I may need to communicate clearly." },
+{ id:98, text:"I made a mistake at home.", distortion:"Overgeneralization", thought:"It is just one mistake." },
+{ id:99, text:"I feel like everything is too much.", distortion:"Catastrophizing", thought:"I can break things into small steps." },
+{ id:100, text:"I am worried about tomorrow.", distortion:"Fortune Telling", thought:"I can focus on today." }
+
+];
+
+// ===== EXPLANATIONS =====
+const explainMap = {
+"Mind Reading":"Assuming what others think without evidence.",
+"Catastrophizing":"Expecting the worst outcome.",
+"Overgeneralization":"One event defines everything.",
+"Emotional Reasoning":"Feelings = facts.",
+"Personalization":"Blaming yourself unnecessarily.",
+"Labeling":"Giving yourself a negative identity.",
+"Black & White Thinking":"All or nothing thinking.",
+"Fortune Telling":"Predicting negative future."
+};
+
+// ===== STATE =====
+let deck=[...scenarios];
+let index=0, step=1, score=0, total=0;
+let current, timer, timeLeft=15;
+let startTime=null;
+
+// ===== NEXT =====
+function next(){
+
+    if(!startTime){
+        startTime=new Date();
+        document.getElementById("startTime").innerText=startTime.toLocaleTimeString();
+    }
+
+    current = deck[index % deck.length];
+    index++;
+
+    clearInterval(timer);
+    step=1;
+
+    document.getElementById("scenario").innerText =
+    "Case "+current.id+": "+current.text;
+
+    load();
+    startTimer();
+}
+
+// ===== TIMER =====
+function startTimer(){
+    timeLeft=15;
+    document.getElementById("timer").innerText="⏱ "+timeLeft;
+
+    timer=setInterval(()=>{
+        timeLeft--;
+        document.getElementById("timer").innerText="⏱ "+timeLeft;
+
+        if(timeLeft<=0){
+            clearInterval(timer);
+            autoFail();
+        }
+    },1000);
+}
+
+function autoFail(){
+    document.getElementById("feedback").innerText="Time up!";
+    log(false);
+    total++;
+    updateStats();
+}
+
+// ===== LOAD =====
+function load(){
+    document.getElementById("options").innerHTML="";
+    document.getElementById("feedback").innerText="";
+    document.getElementById("explain").innerText="";
+
+    document.getElementById("step").innerText="Find the thinking trap";
+
+    show(Object.keys(explainMap), checkD);
+}
+
+// ===== SHOW =====
+function show(arr, fn){
+    const container=document.getElementById("options");
+
+    arr.forEach(option=>{
+        let btn=document.createElement("button");
+        btn.innerText=option;
+        btn.onclick=function(){ fn(btn,option); };
+        container.appendChild(btn);
+    });
+}
+
+// ===== CHECK DISTORTION =====
+function checkD(btn,val){
+    disable();
+
+    if(val===current.distortion){
+        btn.classList.add("correct");
+
+        document.getElementById("feedback").innerText="Correct";
+        document.getElementById("explain").innerText=explainMap[val];
+
+        let r=document.createElement("div");
+        r.className="reflection";
+        r.innerText="What is a healthier way to think?";
+
+        document.getElementById("options").appendChild(r);
+
+        let circle=document.createElement("div");
+        circle.className="circle-btn";
+        circle.innerText="➜";
+
+        circle.onclick=function(){
+            show([
+                current.thought,
+                "This is terrible",
+                "I can't handle this"
+            ], checkT);
+        };
+
+        document.getElementById("options").appendChild(circle);
+
+    } else {
+        btn.classList.add("wrong");
+        document.getElementById("feedback").innerText="Not correct";
+        log(false);
+        total++;
+        updateStats();
+    }
+}
+
+// ===== CHECK THOUGHT =====
+function checkT(btn,val){
+    disable();
+    clearInterval(timer);
+
+    if(val===current.thought){
+        btn.classList.add("correct");
+        document.getElementById("feedback").innerText =
+        "✔ Healthy thinking: "+current.thought;
+        score++;
+        log(true);
+    } else {
+        btn.classList.add("wrong");
+        document.getElementById("feedback").innerText =
+        "Better thought: "+current.thought;
+        log(false);
+    }
+
+    document.getElementById("explain").innerText =
+    "How would this change your feelings or actions?";
+
+    total++;
+    updateStats();
+}
+
+// ===== UTIL =====
+function disable(){
+    document.querySelectorAll("#options button")
+    .forEach(b=>b.disabled=true);
+}
+
+function updateStats(){
+    document.getElementById("score").innerText=score;
+
+    let acc = total>0 ? Math.round((score/total)*100) : 0;
+    document.getElementById("accuracy").innerText=acc+"%";
+    document.getElementById("finalAccuracy").innerText=acc+"%";
+
+    document.getElementById("endTime").innerText =
+    new Date().toLocaleTimeString();
+}
+
+function log(ok){
+    let d=document.createElement("div");
+    d.className="log-item";
+    d.style.color= ok ? "#4caf50":"#ff6b6b";
+    d.innerText="Case "+current.id+" - "+(ok?"Correct":"Wrong");
+    document.getElementById("logItems").prepend(d);
+}
+
+// START
+next();
+
+</script>
+
+</body>
+</html>
