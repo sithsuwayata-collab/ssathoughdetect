@@ -24,6 +24,7 @@ body {
     position:relative;
 }
 
+/* HEADER */
 .header {
     text-align:center;
     padding:10px;
@@ -33,18 +34,19 @@ body {
 
 .header img {
     height:60px;
-    display:block;
     margin:auto;
+    display:block;
 }
 
 .log-btn {
     position:absolute;
     right:10px;
     top:10px;
-    cursor:pointer;
     font-size:20px;
+    cursor:pointer;
 }
 
+/* CARD */
 .card {
     background:white;
     margin:15px;
@@ -61,6 +63,7 @@ body {
     margin-bottom:10px;
 }
 
+/* BUTTONS */
 button {
     width:100%;
     padding:14px;
@@ -76,15 +79,12 @@ button {
 button.correct { background:#28a745; }
 button.wrong { background:#dc3545; }
 
-.next-btn {
-    background:#6c757d;
+/* END BUTTON */
+.end-btn {
+    background:#dc3545;
 }
 
-.footer {
-    text-align:center;
-    padding:10px;
-}
-
+/* LOG PANEL */
 .log-panel {
     position:absolute;
     top:0;
@@ -98,14 +98,19 @@ button.wrong { background:#dc3545; }
     overflow:auto;
 }
 
-.log-panel.open {
-    right:0;
-}
+.log-panel.open { right:0; }
 
 .close-btn {
     text-align:right;
     cursor:pointer;
-    font-size:18px;
+}
+
+/* SCORE CARD */
+.score-card {
+    background:#2f3e52;
+    padding:10px;
+    border-radius:10px;
+    margin-bottom:10px;
 }
 </style>
 </head>
@@ -114,41 +119,41 @@ button.wrong { background:#dc3545; }
 
 <div class="app">
 
+<!-- HEADER -->
 <div class="header">
 <div class="log-btn" onclick="toggleLog()">📊</div>
 <img src="logo.png">
-<h1>Thought Detective</h3>
+<h3>Thought Detective</h3>
 </div>
 
+<!-- MAIN -->
 <div class="card">
 
 <div class="timer" id="timer">⏱ 15</div>
 
 <h3 id="scenario"></h3>
-<h4 id="step"></h4>
+<h4 id="step">Find the thinking trap</h4>
 
 <div id="options"></div>
 
 <p id="feedback"></p>
 <p id="explain"></p>
 
-<button style="background:#dc3545;" onclick="endSession()">End Session</button>
+<button class="end-btn" onclick="endSession()">End Session</button>
 
 </div>
 
-
-
+<!-- LOG PANEL -->
 <div class="log-panel" id="logPanel">
 
 <div class="close-btn" onclick="toggleLog()">✖</div>
 
 <h3>Session</h3>
 
-<!-- NEW SCORE CARD -->
-<div style="background:#2f3e52; padding:10px; border-radius:10px; margin-bottom:10px;">
-<p>Score: <span id="score">0</span></p>
-<p>Answered: <span id="answered">0</span></p>
-<p>Accuracy: <span id="accuracy">0%</span></p>
+<div class="score-card">
+<p>🎯 Score: <span id="score">0</span></p>
+<p>🧩 Answered: <span id="answered">0</span></p>
+<p>📊 Accuracy: <span id="accuracy">0%</span></p>
 </div>
 
 <div id="logItems"></div>
@@ -160,9 +165,11 @@ button.wrong { background:#dc3545; }
 
 </div>
 
+</div>
+
 <script>
-let sessionEnded = false;
-/* ===== FULL 100 SCENARIOS (PASTE YOUR ORIGINAL FULL LIST HERE) ===== */
+
+/* ===== SCENARIOS (PUT FULL 100 HERE) ===== */
 const scenarios = [
 { id:1, text:"My friend didn’t reply to my message all day.", distortion:"Mind Reading", thought:"They might be busy or distracted." },
 { id:2, text:"I failed an important exam I studied for.", distortion:"Catastrophizing", thought:"This is one setback. I can improve." },
@@ -284,8 +291,6 @@ const scenarios = [
 { id:99, text:"I feel like everything is too much.", distortion:"Catastrophizing", thought:"I can break things into small steps." },
 { id:100, text:"I am worried about tomorrow.", distortion:"Fortune Telling", thought:"I can focus on today." }
 
-
-/* 👉 CONTINUE YOUR FULL LIST UP TO 100 HERE */
 ];
 
 /* DISTORTIONS */
@@ -306,30 +311,29 @@ const explainMap={
 "Fortune Telling":"Predicting future."
 };
 
-/* ===== SMART SHUFFLE ===== */
-let deck = [];
-let index = 0;
-
-function shuffleDeck(){
-    deck = [...scenarios];
-    for(let i=deck.length-1;i>0;i--){
-        let j=Math.floor(Math.random()*(i+1));
-        [deck[i],deck[j]]=[deck[j],deck[i]];
-    }
-    index=0;
-}
-
 /* STATE */
+let deck=[], index=0;
 let score=0,total=0;
 let current, timer, timeLeft=15;
 let startTime=null;
+let sessionEnded=false;
 
-/* LOG */
+/* SHUFFLE */
+function shuffleDeck(){
+deck=[...scenarios];
+for(let i=deck.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[deck[i],deck[j]]=[deck[j],deck[i]];
+}
+index=0;
+}
+
+/* LOG PANEL */
 function toggleLog(){
 document.getElementById("logPanel").classList.toggle("open");
 }
 
-/* NEXT */
+/* NEXT AUTO */
 function next(){
 
 if(sessionEnded) return;
@@ -339,37 +343,17 @@ startTime=new Date();
 document.getElementById("startTime").innerText=startTime.toLocaleTimeString();
 }
 
-/* reshuffle when done */
 if(index>=deck.length){
 shuffleDeck();
 }
 
-current = deck[index];
+current=deck[index];
 index++;
 
 load();
 startTimer();
 }
-function endSession(){
 
-    sessionEnded = true;
-
-    clearInterval(timer);
-
-    // Disable all buttons
-    document.querySelectorAll("button").forEach(b => b.disabled = true);
-
-    // Record final end time
-    let end = new Date();
-    document.getElementById("endTime").innerText = end.toLocaleTimeString();
-
-    // Show message
-    document.getElementById("feedback").innerText = "Session ended";
-    document.getElementById("explain").innerText = "You can review your results in the score panel";
-
-}
-
-    
 /* TIMER */
 function startTimer(){
 clearInterval(timer);
@@ -393,26 +377,25 @@ document.getElementById("scenario").innerText=current.text;
 document.getElementById("options").innerHTML="";
 document.getElementById("feedback").innerText="";
 document.getElementById("explain").innerText="";
-document.getElementById("step").innerText="Find the thinking trap";
 
-/* PICK 5 OPTIONS */
 let opts=[current.distortion];
 while(opts.length<5){
 let r=distortions[Math.floor(Math.random()*distortions.length)];
 if(!opts.includes(r)) opts.push(r);
 }
+
 opts.sort(()=>Math.random()-0.5);
 
 opts.forEach(o=>{
 let b=document.createElement("button");
 b.innerText=o;
-b.onclick=()=>checkD(b,o);
+b.onclick=()=>check(b,o);
 document.getElementById("options").appendChild(b);
 });
 }
 
 /* CHECK */
-function checkD(btn,val){
+function check(btn,val){
 disable();
 clearInterval(timer);
 
@@ -432,16 +415,10 @@ document.getElementById("explain").innerText=explainMap[current.distortion];
 total++;
 updateStats();
 
-/* 👉 AUTO NEXT AFTER 2 SECONDS */
+/* AUTO NEXT */
 setTimeout(()=>{
-    if(!sessionEnded) next();
-},3000);
-}
-
-document.getElementById("explain").innerText=explainMap[current.distortion];
-
-total++;
-updateStats();
+if(!sessionEnded) next();
+},1500);
 }
 
 /* FAIL */
@@ -455,10 +432,22 @@ total++;
 log(false);
 updateStats();
 
-/* 👉 AUTO NEXT */
 setTimeout(()=>{
-    if(!sessionEnded) next();
-},3000);
+if(!sessionEnded) next();
+},1500);
+}
+
+/* END SESSION */
+function endSession(){
+sessionEnded=true;
+clearInterval(timer);
+
+document.querySelectorAll("button").forEach(b=>b.disabled=true);
+
+document.getElementById("feedback").innerText="Session ended";
+document.getElementById("explain").innerText="Check your score panel";
+
+document.getElementById("endTime").innerText=new Date().toLocaleTimeString();
 }
 
 /* UTIL */
@@ -467,16 +456,11 @@ document.querySelectorAll("#options button").forEach(b=>b.disabled=true);
 }
 
 function updateStats(){
+document.getElementById("score").innerText=score;
+document.getElementById("answered").innerText=total;
 
-    document.getElementById("score").innerText = score;
-    document.getElementById("answered").innerText = total;
-
-    let acc = total > 0 ? Math.round((score / total) * 100) : 0;
-
-    document.getElementById("accuracy").innerText = acc + "%";
-    document.getElementById("finalAccuracy").innerText = acc + "%";
-
-    document.getElementById("endTime").innerText = new Date().toLocaleTimeString();
+let acc=Math.round((score/total)*100);
+document.getElementById("accuracy").innerText=acc+"%";
 }
 
 function log(ok){
