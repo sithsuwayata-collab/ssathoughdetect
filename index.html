@@ -117,7 +117,7 @@ button.wrong { background:#dc3545; }
 <div class="header">
 <div class="log-btn" onclick="toggleLog()">📊</div>
 <img src="logo.png">
-<h3>Thought Detective</h3>
+<h1>Thought Detective</h3>
 </div>
 
 <div class="card">
@@ -132,7 +132,7 @@ button.wrong { background:#dc3545; }
 <p id="feedback"></p>
 <p id="explain"></p>
 
-<button class="next-btn" onclick="next()">Next →</button>
+<button style="background:#dc3545;" onclick="endSession()">End Session</button>
 
 </div>
 
@@ -161,7 +161,7 @@ button.wrong { background:#dc3545; }
 </div>
 
 <script>
-
+let sessionEnded = false;
 /* ===== FULL 100 SCENARIOS (PASTE YOUR ORIGINAL FULL LIST HERE) ===== */
 const scenarios = [
 { id:1, text:"My friend didn’t reply to my message all day.", distortion:"Mind Reading", thought:"They might be busy or distracted." },
@@ -348,7 +348,26 @@ index++;
 load();
 startTimer();
 }
+function endSession(){
 
+    sessionEnded = true;
+
+    clearInterval(timer);
+
+    // Disable all buttons
+    document.querySelectorAll("button").forEach(b => b.disabled = true);
+
+    // Record final end time
+    let end = new Date();
+    document.getElementById("endTime").innerText = end.toLocaleTimeString();
+
+    // Show message
+    document.getElementById("feedback").innerText = "Session ended";
+    document.getElementById("explain").innerText = "You can review your results in the score panel";
+
+}
+
+    
 /* TIMER */
 function startTimer(){
 clearInterval(timer);
