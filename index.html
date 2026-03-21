@@ -137,7 +137,9 @@ button.wrong { background:#dc3545; }
 </div>
 
 <div class="footer">
-Score: <span id="score">0</span> | Accuracy: <span id="accuracy">0%</span>
+Score: <span id="score">0</span> | 
+Answered: <span id="answered">0</span> | 
+Accuracy: <span id="accuracy">0%</span>
 </div>
 
 <div class="log-panel" id="logPanel">
@@ -419,11 +421,17 @@ document.querySelectorAll("#options button").forEach(b=>b.disabled=true);
 }
 
 function updateStats(){
-document.getElementById("score").innerText=score;
-let acc=Math.round((score/total)*100);
-document.getElementById("accuracy").innerText=acc+"%";
-document.getElementById("finalAccuracy").innerText=acc+"%";
-document.getElementById("endTime").innerText=new Date().toLocaleTimeString();
+    document.getElementById("score").innerText = score;
+
+    // NEW LINE
+    document.getElementById("answered").innerText = total;
+
+    let acc = total > 0 ? Math.round((score / total) * 100) : 0;
+
+    document.getElementById("accuracy").innerText = acc + "%";
+    document.getElementById("finalAccuracy").innerText = acc + "%";
+
+    document.getElementById("endTime").innerText = new Date().toLocaleTimeString();
 }
 
 function log(ok){
