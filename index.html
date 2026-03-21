@@ -332,12 +332,13 @@ document.getElementById("logPanel").classList.toggle("open");
 /* NEXT */
 function next(){
 
+if(sessionEnded) return;
+
 if(!startTime){
 startTime=new Date();
 document.getElementById("startTime").innerText=startTime.toLocaleTimeString();
 }
 
-/* RESHUFFLE WHEN DONE */
 if(index>=deck.length){
 shuffleDeck();
 }
@@ -433,6 +434,8 @@ updateStats();
 
 /* FAIL */
 function fail(){
+if(sessionEnded) return;
+
 document.getElementById("feedback").innerText="Time up! Correct: "+current.distortion;
 document.getElementById("explain").innerText=explainMap[current.distortion];
 total++;
