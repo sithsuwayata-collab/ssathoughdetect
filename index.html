@@ -3,267 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thought Detective | Luminous Green</title>
+    <title>Thought Detective | Luminous 30s</title>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --frame-grad: linear-gradient(135deg, #065f46 0%, #10b981 100%);
-            --glow-green: #adff2f;
-            --btn-text: #064e3b;
-            --glass: rgba(0, 0, 0, 0.3);
+            --bg: #020617;
+            --frame-1: #065f46;
+            --frame-2: #10b981;
+            --neon: #adff2f;
+            --neon-glow: rgba(173, 255, 47, 0.4);
+            --btn-shadow: #65a30d;
         }
 
         body { 
             font-family: 'Inter', sans-serif; 
-            margin: 0; 
-            background: #020617;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin: 0; background: var(--bg);
+            height: 100vh; display: flex;
+            justify-content: center; align-items: center;
             overflow: hidden;
         }
 
-        /* The Shining App Frame - Green Gradient */
+        /* The App Frame */
         .app-frame {
-            width: 350px;
-            height: 620px;
-            background: var(--frame-grad);
-            border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 40px;
-            position: relative;
-            box-shadow: 0 0 50px rgba(16, 185, 129, 0.3);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
+            width: 340px; height: 600px;
+            background: linear-gradient(135deg, var(--frame-1), var(--frame-2));
+            border-radius: 40px; position: relative;
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.2);
+            padding: 20px; display: flex; flex-direction: column;
+            border: 2px solid rgba(255,255,255,0.1);
             overflow: hidden;
         }
 
-        /* Luminous Shine effect */
-        .app-frame::before {
-            content: "";
-            position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(173, 255, 47, 0.1), transparent);
-            transform: rotate(45deg);
-            animation: shine 5s infinite;
+        /* Shine Animation - Pointer Events Disabled to fix "unclickable" issue */
+        .app-frame::after {
+            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg); animation: shine 6s infinite;
+            pointer-events: none; z-index: 5;
         }
 
         @keyframes shine { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
 
-        /* Score & Timer Bar */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 10;
-            color: white;
+        .top-bar { display: flex; justify-content: space-between; align-items: center; z-index: 10; margin-bottom: 15px; }
+        
+        #timer-box { background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 20px; color: var(--neon); font-weight: 900; font-size: 0.9rem; border: 1px solid var(--neon); }
+
+        .icon-btn { background: rgba(0,0,0,0.4); border: 1px solid var(--neon); color: var(--neon); width: 35px; height: 35px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; }
+
+        /* Question Area */
+        .scenario-card { background: #fff; padding: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 10; position: relative; }
+        h2 { font-size: 0.9rem; margin: 0; color: #1e293b; line-height: 1.4; text-align: center; }
+
+        /* Feedback Screen (Hidden by default) */
+        #feedback-screen {
+            background: #020617; color: #fff; padding: 15px; border-radius: 15px; margin-top: 15px;
+            display: none; border: 1px solid var(--neon); box-shadow: 0 0 15px var(--neon-glow);
+            z-index: 20; position: relative;
         }
 
-        .icon-btn {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.2);
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            color: var(--glow-green);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Question Screen */
-        .scenario-card {
-            background: rgba(255, 255, 255, 0.95);
-            margin-top: 15px;
-            padding: 18px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-
-        h2 { font-size: 0.95rem; color: #064e3b; margin: 0; font-weight: 700; }
-
-        /* Highlighted Answer Box */
-        #answer-display {
-            background: #020617;
-            color: #ecfdf5;
-            padding: 15px;
-            border-radius: 15px;
-            margin-top: 15px;
-            display: none;
-            font-size: 0.8rem;
-            border: 1px solid var(--glow-green);
-            box-shadow: 0 0 15px rgba(173, 255, 47, 0.2);
-        }
-
-        /* Tiny 3D Luminous Buttons */
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: auto;
-            margin-bottom: 10px;
-        }
-
+        /* Ultra-Small 3D Luminous Buttons */
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto; z-index: 10; margin-bottom: 10px; }
+        
         .opt-btn {
-            background: var(--glow-green);
-            border: none;
-            padding: 10px 4px;
-            border-radius: 8px;
-            font-size: 10px;
-            font-weight: 800;
-            color: var(--btn-text);
-            cursor: pointer;
-            box-shadow: 0 4px 0 #82c91e; /* 3D effect */
-            transition: all 0.1s;
-            text-transform: uppercase;
+            background: var(--neon); border: none; padding: 12px 2px; border-radius: 8px;
+            font-size: 10px; font-weight: 900; color: #064e3b; cursor: pointer;
+            box-shadow: 0 4px 0 var(--btn-shadow); position: relative;
+            transition: all 0.05s; text-transform: uppercase;
         }
 
-        .opt-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 #82c91e;
-        }
+        .opt-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--btn-shadow); }
+        .opt-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        /* Score Card Modal */
-        #score-modal {
-            position: absolute;
-            inset: 0;
-            background: rgba(2, 6, 23, 0.98);
-            z-index: 100;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            padding: 30px;
+        /* Score Modal */
+        #score-card {
+            position: absolute; inset: 0; background: rgba(2,6,23,0.95);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            color: white; z-index: 100; padding: 30px;
         }
-
-        .stat-line {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            margin: 8px 0;
-            border-bottom: 1px solid rgba(173, 255, 47, 0.2);
-            padding-bottom: 4px;
-        }
-
-        .val { color: var(--glow-green); font-weight: 800; }
+        .stat-row { width: 100%; display: flex; justify-content: space-between; margin: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+        .stat-val { color: var(--neon); font-weight: 900; }
     </style>
 </head>
 <body>
 
 <div class="app-frame">
     <div class="top-bar">
-        <div id="timer" style="font-weight: 800;">⏱ 15s</div>
-        <button class="icon-btn" onclick="toggleScore()">
-            <i data-lucide="layout-grid"></i>
-        </button>
+        <div id="timer-box">30s</div>
+        <button class="icon-btn" onclick="toggleScore()"><i data-lucide="layout-grid"></i></button>
     </div>
 
     <div class="scenario-card">
-        <h2 id="scenario-text">Identifying cognitive distortion...</h2>
+        <h2 id="scenario-text">Detecting thought pattern...</h2>
     </div>
 
-    <div id="answer-display">
-        <div id="res-title" style="color:var(--glow-green); font-weight:800; margin-bottom:4px;"></div>
-        <div id="res-body"></div>
-        <button onclick="next()" style="margin-top:10px; width:100%; background:var(--glow-green); border:none; border-radius:5px; padding:6px; font-weight:800; cursor:pointer;">CONTINUE</button>
+    <div id="feedback-screen">
+        <div id="fb-status" style="color: var(--neon); font-weight: 900; margin-bottom: 5px;"></div>
+        <div id="fb-thought" style="font-size: 0.8rem; margin-bottom: 10px;"></div>
+        <button onclick="nextCase()" style="width:100%; padding:8px; background:var(--neon); border:none; border-radius:5px; font-weight:900; cursor:pointer;">NEXT CASE</button>
     </div>
 
     <div id="options" class="options-grid"></div>
 
-    <div id="score-modal">
-        <i data-lucide="zap" size="40" style="color:var(--glow-green); margin-bottom:10px;"></i>
-        <h3 style="margin-bottom:20px;">MISSION STATS</h3>
-        <div class="stat-line"><span>Start Time:</span> <span id="s-start" class="val">-</span></div>
-        <div class="stat-line"><span>Situations:</span> <span id="s-total" class="val">0</span></div>
-        <div class="stat-line"><span>Correct:</span> <span id="s-correct" class="val">0</span></div>
-        <div class="stat-line"><span>Efficiency:</span> <span id="s-percent" class="val">0%</span></div>
-        <button onclick="toggleScore()" style="margin-top:30px; background:transparent; border: 1px solid var(--glow-green); color:var(--glow-green); padding:8px 20px; border-radius:20px; cursor:pointer;">CLOSE</button>
+    <div id="score-card">
+        <i data-lucide="shield-check" size="48" style="color:var(--neon); margin-bottom:10px;"></i>
+        <h3 style="letter-spacing: 2px;">DETECTIVE STATS</h3>
+        <div class="stat-row"><span>Started:</span> <span id="stat-start" class="stat-val">-</span></div>
+        <div class="stat-row"><span>Situations:</span> <span id="stat-total" class="stat-val">0</span></div>
+        <div class="stat-row"><span>Solved:</span> <span id="stat-correct" class="stat-val">0</span></div>
+        <div class="stat-row"><span>Accuracy:</span> <span id="stat-percent" class="stat-val">0%</span></div>
+        <button onclick="toggleScore()" style="margin-top:20px; background:transparent; border:1px solid var(--neon); color:var(--neon); padding:10px 20px; border-radius:20px; cursor:pointer;">BACK TO FIELD</button>
     </div>
 </div>
 
 <script>
-    // Example data - extend with your 100 items
+    // Minimal data sample - add your 100 scenarios here
     const scenarios = [
-        { id:1, text:"My boss didn't say hi, he must be planning to fire me.", distortion:"Fortune Telling", thought:"He's likely just busy." },
-        { id:2, text:"I burned the toast. I can't do anything right.", distortion:"Overgeneralization", thought:"It's just one mistake." }
+        { id:1, text:"They didn't call me back, they must hate me.", distortion:"Mind Reading", thought:"They might be busy." },
+        { id:2, text:"I made one mistake, I'm a complete failure.", distortion:"Labeling", thought:"One mistake doesn't define me." }
     ];
 
-    const distortions = ["Mind Reading", "Catastrophizing", "Overgeneralization", "Fortune Telling", "Personalization", "Labeling", "Black & White", "Emotional Reasoning"];
+    const types = ["Mind Reading", "Catastrophizing", "Overgeneralization", "Emotional Reasoning", "Personalization", "Labeling", "Fortune Telling", "Black & White"];
 
-    let state = {
+    let stats = {
         idx: 0, score: 0, total: 0,
-        start: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        timeLeft: 15, timer: null
+        start: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+        timeLeft: 30, timer: null
     };
 
-    function next() {
-        clearInterval(state.timer);
-        state.timeLeft = 15;
-        document.getElementById('answer-display').style.display = 'none';
-        const cur = scenarios[state.idx % scenarios.length];
+    function nextCase() {
+        clearInterval(stats.timer);
+        stats.timeLeft = 30; // Timer set to 30s
+        document.getElementById('timer-box').innerText = stats.timeLeft + "s";
+        document.getElementById('feedback-screen').style.display = 'none';
+        
+        const cur = scenarios[stats.idx % scenarios.length];
         document.getElementById('scenario-text').innerText = cur.text;
         
-        const optCont = document.getElementById('options');
-        optCont.innerHTML = '';
-        distortions.forEach(d => {
-            const b = document.createElement('button');
-            b.className = 'opt-btn';
-            b.innerText = d;
-            b.onclick = () => check(d, cur);
-            optCont.appendChild(b);
+        const grid = document.getElementById('options');
+        grid.innerHTML = "";
+        types.forEach(t => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.innerText = t;
+            btn.onclick = () => check(t, cur);
+            grid.appendChild(btn);
         });
+        
         startTimer();
-        state.idx++;
+        stats.idx++;
     }
 
     function check(choice, cur) {
-        clearInterval(state.timer);
-        state.total++;
-        const disp = document.getElementById('answer-display');
-        const title = document.getElementById('res-title');
-        const body = document.getElementById('res-body');
+        clearInterval(stats.timer);
+        stats.total++;
+        
+        // Disable all buttons to prevent double-click
+        document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+
+        const fb = document.getElementById('feedback-screen');
+        const status = document.getElementById('fb-status');
+        const thought = document.getElementById('fb-thought');
 
         if(choice === cur.distortion) {
-            state.score++;
-            title.innerText = "Target Neutralized!";
-            body.innerText = `Correct. Counter-thought: ${cur.thought}`;
+            stats.score++;
+            status.innerText = "EVIDENCE CONFIRMED";
+            thought.innerText = "Healthy Perspective: " + cur.thought;
         } else {
-            title.innerText = "Signal Interference";
-            body.innerText = `Actually ${cur.distortion}. Counter: ${cur.thought}`;
+            status.innerText = "FALSE LEAD";
+            thought.innerText = "Actually " + cur.distortion + ". Better Thought: " + cur.thought;
         }
-        disp.style.display = 'block';
-        updateStats();
+
+        fb.style.display = 'block';
+        updateUI();
     }
 
     function startTimer() {
-        state.timer = setInterval(() => {
-            state.timeLeft--;
-            document.getElementById('timer').innerText = `⏱ ${state.timeLeft}s`;
-            if(state.timeLeft <= 0) { clearInterval(state.timer); next(); }
+        stats.timer = setInterval(() => {
+            stats.timeLeft--;
+            document.getElementById('timer-box').innerText = stats.timeLeft + "s";
+            if(stats.timeLeft <= 0) {
+                clearInterval(stats.timer);
+                alert("Time up! Trail went cold.");
+                nextCase();
+            }
         }, 1000);
     }
 
-    function updateStats() {
-        document.getElementById('s-total').innerText = state.total;
-        document.getElementById('s-correct').innerText = state.score;
-        document.getElementById('s-percent').innerText = Math.round((state.score/state.total)*100) + "%";
+    function updateUI() {
+        document.getElementById('stat-total').innerText = stats.total;
+        document.getElementById('stat-correct').innerText = stats.score;
+        document.getElementById('stat-percent').innerText = Math.round((stats.score/stats.total)*100) + "%";
     }
 
     function toggleScore() {
-        const m = document.getElementById('score-modal');
-        m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+        const modal = document.getElementById('score-card');
+        modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
     }
 
     window.onload = () => {
         lucide.createIcons();
-        document.getElementById('s-start').innerText = state.start;
-        next();
+        document.getElementById('stat-start').innerText = stats.start;
+        nextCase();
     };
 </script>
 </body>
