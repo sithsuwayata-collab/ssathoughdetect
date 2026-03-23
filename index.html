@@ -9,6 +9,135 @@
     
     <style>
         :root {
+    --primary: #6366f1;
+    --glass-bg: rgba(255, 255, 255, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.6);
+    --shadow-3d: 0 4px 0 #cbd5e0;
+    --shadow-3d-active: 0 1px 0 #cbd5e0;
+}
+
+body { 
+    font-family: 'Inter', sans-serif; 
+    margin: 0; 
+    /* Deep gradient background to make the glass pop */
+    background: radial-gradient(circle at top right, #6366f1, #a855f7, #ec4899);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* The Shining Glass Frame */
+.main-container {
+    width: 90%;
+    max-width: 420px;
+    padding: 5px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px); /* Frosted effect */
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 40px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated Shine Sweep */
+.main-container::after {
+    content: "";
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    animation: shine 6s infinite;
+    pointer-events: none;
+}
+
+@keyframes shine {
+    0% { left: -100%; top: -100%; }
+    20% { left: 100%; top: 100%; }
+    100% { left: 100%; top: 100%; }
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.85);
+    padding: 30px;
+    border-radius: 35px;
+    text-align: center;
+}
+
+/* 3D Smaller Glassy Buttons */
+button.opt-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--glass-border);
+    padding: 12px 8px; /* Smaller footprint */
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+    box-shadow: var(--shadow-3d); /* The 3D Depth */
+    transition: all 0.1s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+    top: 0;
+}
+
+/* Button "Press" Animation */
+button.opt-btn:active {
+    top: 3px; /* Moves down to simulate click */
+    box-shadow: var(--shadow-3d-active);
+    background: #f8fafc;
+}
+
+button.opt-btn:hover {
+    background: #ffffff;
+    transform: translateY(-1px);
+}
+
+/* Correct/Wrong 3D States */
+button.opt-btn.correct {
+    background: #d1fae5;
+    box-shadow: 0 4px 0 #10b981;
+    color: #065f46;
+}
+
+button.opt-btn.wrong {
+    background: #fee2e2;
+    box-shadow: 0 4px 0 #ef4444;
+    color: #991b1b;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* Navigation & Header Adjustments */
+.badge {
+    background: var(--primary);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+h2#scenario {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 20px 0;
+}
+        :root {
             --primary: #6366f1;
             --primary-dark: #4f46e5;
             --bg: #f8fafc;
