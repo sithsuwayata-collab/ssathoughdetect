@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thought Detective | CBT Elite</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --error: #ef4444;
+            --accent: #f59e0b;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Top Navigation/Progress */
+        .top-nav {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .progress-container {
+            flex: 1;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            margin: 0 20px;
+            overflow: hidden;
+        }
+
+        #progressBar {
+            width: 0%;
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.4s ease;
+        }
+
+        /* Main Game Card */
+        .main-container {
+            width: 90%;
+            max-width: 500px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #e0e7ff;
+            color: var(--primary);
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        h2#scenario {
+            font-size: 1.25rem;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            color: var(--text-main);
+        }
+
+        /* Option Buttons */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        button.opt-btn {
+            background: #f1f5f9;
+            border: 2px solid transparent;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button.opt-btn:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+        }
+
+        button.opt-btn.correct {
+            background: #ecfdf5;
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        button.opt-btn.wrong {
+            background: #fef2f2;
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        /* Feedback Area */
+        #feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Stats Bar */
+        .stats-footer {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .stat-val { color: var(--text-main); font-weight: 600; }
+
+        /* Floating Log Toggle */
+        .log-trigger {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--text-main);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 99px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* Timer UI */
+        .timer-ring {
+            font-weight: 600;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="top-nav">
+        <i data-lucide="shield-check" style="color:var(--primary)"></i>
+        <div class="progress-container">
+            <div id="progressBar"></div>
+        </div>
+        <div id="accuracy-top" style="font-weight:600">0%</div>
+    </div>
+
+    <div class="main-container">
+        <div class="card">
+            <div class="timer-ring">
+                <i data-lucide="clock" size="18"></i>
+                <span id="timer">15</span>s
+            </div>
+            
+            <div id="badge" class="badge">Case #1</div>
+            <h2 id="scenario">Loading your first case, detective...</h2>
+            
+            <div id="options" class="options-grid"></div>
+
+            <div id="feedback-box">
+                <p id="feedback-text" style="font-weight:600; margin:0;"></p>
+                <p id="explain-text" style="font-size:14px; color:var(--text-muted); margin-top:8px;"></p>
+                <button id="nextBtn" onclick="next()" style="width:auto; margin-top:15px; background:var(--primary); padding:10px 25px;">
+                    Next Case →
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-footer">
+            <div>Score: <span class="stat-val" id="score">0</span></div>
+            <div>Solved: <span class="stat-val" id="totalSolved">0</span></div>
+        </div>
+    </div>
+
+    <div class="log-trigger" onclick="alert('Session Log feature could be a side drawer here!')">
+        <i data-lucide="file-text" size="18"></i>
+        <span>Evidence Log</span>
+    </div>
+
+    <script>
+        // Use your existing scenarios array here (omitted for brevity in display)
+        const scenarios = [
+            { id:1, text:"My friend didn’t reply to my message all day.", distortion:"Mind Reading", thought:"They might be busy or distracted." },
+            { id:2, text:"I failed an important exam I studied for.", distortion:"Catastrophizing", thought:"This is one setback. I can improve." },
+            { id:3, text:"My parents keep asking why I am not married yet.", distortion:"Personalization", thought:"They are concerned, not judging my worth." }
+            // ... (keep all 100 from your original file)
+        ];
+
+        const explainMap = {
+            "Mind Reading":"Assuming thoughts without proof.",
+            "Catastrophizing":"Imagining the worst case.",
+            "Overgeneralization":"One event = universal rule.",
+            "Emotional Reasoning":"Feelings are not facts.",
+            "Personalization":"Taking it too personally.",
+            "Labeling":"Fixed negative identity.",
+            "Black & White Thinking":"No middle ground.",
+            "Fortune Telling":"Predicting failure."
+        };
+
+        let index=0, score=0, total=0, timer, timeLeft=15;
+
+        function next() {
+            const current = scenarios[index % scenarios.length];
+            index++;
+            
+            // UI Reset
+            document.getElementById("feedback-box").style.display = "none";
+            document.getElementById("options").style.display = "grid";
+            document.getElementById("badge").innerText = `Case #${current.id}`;
+            document.getElementById("scenario").innerText = current.text;
+            document.getElementById("progressBar").style.width = (index % scenarios.length) + "%";
+            
+            loadOptions(current);
+            startTimer();
+        }
+
+        function loadOptions(current) {
+            const container = document.getElementById("options");
+            container.innerHTML = "";
+            
+            Object.keys(explainMap).forEach(opt => {
+                const btn = document.createElement("button");
+                btn.className = "opt-btn";
+                btn.innerHTML = `<i data-lucide="search" size="16"></i><span>${opt}</span>`;
+                btn.onclick = () => checkDistortion(btn, opt, current);
+                container.appendChild(btn);
+            });
+            lucide.createIcons();
+        }
+
+        function checkDistortion(btn, val, current) {
+            clearInterval(timer);
+            const allBtns = document.querySelectorAll(".opt-btn");
+            allBtns.forEach(b => b.disabled = true);
+
+            const feedbackBox = document.getElementById("feedback-box");
+            const feedbackText = document.getElementById("feedback-text");
+            const explainText = document.getElementById("explain-text");
+
+            if(val === current.distortion) {
+                btn.classList.add("correct");
+                score++;
+                feedbackText.innerText = "Evidence Found!";
+                feedbackText.style.color = "var(--success)";
+                explainText.innerText = `Correct. This is ${val}: ${explainMap[val]}. Target thought: "${current.thought}"`;
+            } else {
+                btn.classList.add("wrong");
+                feedbackText.innerText = "False Lead";
+                feedbackText.style.color = "var(--error)";
+                explainText.innerText = `Actually, this was ${current.distortion}. Detective, try refocusing your perspective.`;
+            }
+
+            total++;
+            updateStats();
+            feedbackBox.style.display = "block";
+        }
+
+        function startTimer() {
+            clearInterval(timer);
+            timeLeft = 15;
+            const timerEl = document.getElementById("timer");
+            timerEl.innerText = timeLeft;
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                timerEl.innerText = timeLeft;
+                if(timeLeft <= 0) {
+                    clearInterval(timer);
+                    alert("Time is up! The trail went cold.");
+                    next();
+                }
+            }, 1000);
+        }
+
+        function updateStats() {
+            document.getElementById("score").innerText = score;
+            document.getElementById("totalSolved").innerText = total;
+            const acc = Math.round((score/total)*100);
+            document.getElementById("accuracy-top").innerText = acc + "%";
+        }
+
+        // Initialize
+        window.onload = () => {
+            lucide.createIcons();
+            next();
+        };
+    </script>
+</body>
+</html>
