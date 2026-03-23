@@ -1,251 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cognitive Detective SL | CBT</title>
-<script src="https://unpkg.com/lucide@latest"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;600;900&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thought Detective SL | CBT</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Calm Zen Colors */
+            --bg-calm: #022c22;
+            --glass: rgba(255, 255, 255, 0.1);
+            --neon-green: #adff2f;
+            --soft-green: #ecfdf5;
+            --text-dark: #064e3b;
+        }
 
-<style>
-/* 1. RESET & CSS VARIABLES FOR NEW THEME */
-body, h1, h2, h3, h4, p, figure, dl, dd { margin: 0; padding: 0; }
-body { 
-    font-family: 'Plus Jakarta Sans', sans-serif; 
-    line-height: 1.5; color: white; overflow: hidden; height: 100vh;
-    /* 2. THE NEW CALM BACKGROUND */
-    background-color: #020617; /* Flat deep space, non-moving */
-    background-image: radial-gradient(circle at top right, #002d24, #00100c);
-}
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0; 
+            background-color: var(--bg-calm);
+            background-image: radial-gradient(circle at top right, #065f46, #022c22);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            overflow: hidden;
+        }
 
-:root {
-    --bg-frame: #064e3b;
-    --glass: rgba(255, 255, 255, 0.05); /* Frosted effect */
-    --neon-green: #adff2f;
-    --soft-green: #ecfdf5;
-    --text-dark: #064e3b;
-}
+        /* The Mobile App Frame */
+        .app-container {
+            width: 360px;
+            height: 640px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 40px;
+            position: relative;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
 
-/* 3. APP CONTAINERS with Glassmorphism */
-.app-screen { 
-    width: 100%; height: 100%; position: absolute; inset: 0; 
-    transition: opacity 0.5s ease, transform 0.5s ease; padding: 25px; 
-    box-sizing: border-box; display: none; /* Controlled by active class */
-    background-color: transparent;
-    transform: scale(0.95); opacity: 0;
-}
-.app-screen.active { display: flex; flex-direction: column; opacity: 1; transform: scale(1); }
+        /* Modern App Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
 
-/* == LOG PANEL (NOW A GLASS SIDEBAR) == */
-#score-card-modal {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 200;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-    backdrop-filter: blur(10px);
-}
+        #timer-pill {
+            background: rgba(0,0,0,0.3);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+        }
 
-.stat-row {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    margin: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    padding-bottom: 4px;
-}
-.stat-val { color: var(--neon-green); font-weight: 900; }
+        /* Question Card */
+        .case-card {
+            background: white;
+            border-radius: 28px;
+            padding: 24px;
+            color: var(--text-dark);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
 
-/* The Modern Magnifying Glass (Start Button) */
-.start-btn {
-    width: 70px; height: 70px;
-    border-radius: 50%;
-    border: 3px solid var(--neon-green);
-    background: transparent;
-    color: var(--neon-green);
-    font-size: 2.2rem;
-    cursor: pointer;
-    margin-top: 40px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 0 15px rgba(173, 255, 47, 0.2);
-}
+        h2 { font-size: 0.9rem; line-height: 1.5; margin: 0; font-weight: 600; text-align: center; }
 
-/* Case Card */
-.case-card { 
-    background: white; border-radius: 28px; padding: 24px; color: var(--text-dark); 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin-top: 20px; text-align: center; 
-    z-index: 10;
-}
-h2 { font-size: 0.95rem; line-height: 1.5; margin: 0; font-weight: 600; }
+        /* Highlighted Feedback Screen */
+        #feedback-panel {
+            background: #022c22;
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+            border-left: 4px solid var(--neon-green);
+            font-size: 0.8rem;
+            animation: slideUp 0.3s ease;
+        }
 
-/* 3D Circular Buttons */
-.options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: auto; padding-bottom: 20px; z-index: 10; }
-.opt-btn {
-    background: var(--soft-green);
-    border: none;
-    height: 65px; /* Taller, circular feel */
-    border-radius: 35px; /* Pill shape */
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--text-dark);
-    text-transform: uppercase;
-    cursor: pointer;
-    box-shadow: 0 4px 0 #82c91e;
-    transition: all 0.1s;
-    text-align: center;
-    padding: 5px;
-}
-.opt-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #82c91e; }
-.opt-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-</style>
+        /* 3D Circular Pill Buttons */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: auto;
+            padding-bottom: 10px;
+        }
+
+        .opt-btn {
+            background: var(--soft-green);
+            border: none;
+            height: 65px; /* Taller, circular feel */
+            border-radius: 35px; /* Pill shape */
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #82c91e; /* 3D effect */
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 5px;
+        }
+
+        .opt-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #82c91e;
+        }
+
+        .opt-btn.correct { background: #d1fae5; box-shadow: 0 4px 0 #10b981; color: #065f46; }
+        .opt-btn.wrong { background: #fee2e2; box-shadow: 0 4px 0 #ef4444; color: #991b1b; }
+
+        /* Bottom Log Drawer (Collapsible) */
+        #log-drawer {
+            position: absolute;
+            bottom: -100%; /* Hidden */
+            left: 0;
+            width: 100%;
+            height: 90%;
+            background: #064e3b;
+            border-radius: 35px 35px 0 0;
+            padding: 24px;
+            z-index: 100;
+            transition: bottom 0.3s ease-out;
+            color: white;
+            box-sizing: border-box;
+        }
+
+        #log-drawer.open { bottom: 0; }
+        
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 10px; color: var(--neon-green); font-weight: 800; font-size: 1.1rem; }
+    </style>
 </head>
-
 <body>
 
-<div style="position:fixed; inset:0; padding:10px; pointer-events:none; z-index:1000; border-radius:45px; box-shadow: 0 0 50px rgba(16, 185, 129, 0.15); border: 1px solid rgba(255,255,255,0.05);"></div>
-
-<div style="position:relative; width:100%; height:100vh; border-radius:40px; overflow:hidden;">
-
-    <div id="landing-screen" class="app-screen active">
-        <h1 style="font-weight: 900; font-size: 1.8rem; color: #ecfdf5;">DETECTIVE: C.B.T.</h1>
-        <p style="font-size: 0.85rem; color: #82c91e; margin-top: 5px;">Reframing Perspective, one case at a time.</p>
-        
-        <button class="start-btn" onclick="launchGame()" aria-label="Start Game">
-            ⚲ </button>
+<div class="app-container">
+    <div class="header">
+        <div id="timer-pill">30s</div>
+        <div onclick="toggleLog()" style="cursor:pointer;"><i data-lucide="layout-grid"></i></div>
     </div>
 
-    <div id="game-screen" class="app-screen">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div id="timer-pill" style="color:var(--neon-green); font-weight:800; font-size:0.9rem;">30s</div>
-            <div style="cursor:pointer;" onclick="toggleScoreCard()"><i data-lucide="bar-chart-3"></i></div>
-        </div>
-
-        <div class="case-card">
-            <div style="font-size: 0.7rem; color: #64748b; font-weight: 800; letter-spacing: 1px;">SITUATION</div>
-            <h2 id="scenario-text">Detecting thought pattern...</h2>
-        </div>
-
-        <div id="feedback-panel" style="background:#022c22; border-radius:20px; padding:15px; margin-top:15px; display:none; border-left:4px solid var(--neon-green); font-size:0.8rem;">
-            <div id="fb-status" style="color: var(--neon-green); font-weight: 800; text-transform: uppercase;"></div>
-            <div id="fb-thought" style="margin: 6px 0 10px;"></div>
-            <button onclick="nextCase()" style="width:100%; border-radius:12px; border:none; background:var(--neon-green); color:var(--text-dark); padding:10px; font-weight:800; cursor:pointer;">NEXT CASE</button>
-        </div>
-
-        <div id="options-grid" class="options-grid"></div>
-
-        <div id="score-card-modal">
-            <i data-lucide="award" size="40" style="color:var(--neon-green); margin-bottom:10px;"></i>
-            <h3>Session Stats</h3>
-            <div style="width:100%; margin-top:20px;">
-                <div class="stat-row"><span>Start Time:</span> <span id="s-start" class="stat-val">-</span></div>
-                <div class="stat-row"><span>Cases Solved:</span> <span id="s-faced" class="stat-val">0</span></div>
-                <div class="stat-row"><span>Correct Answers:</span> <span id="s-correct" class="stat-val">0</span></div>
-                <div class="stat-row"><span>Accuracy %:</span> <span id="s-percent" class="stat-val">0%</span></div>
-            </div>
-            <button onclick="toggleScoreCard()" style="margin-top:20px; background:var(--glass); border:none; color:white; padding:10px; border-radius:10px; cursor:pointer;">CLOSE</button>
-        </div>
+    <div class="case-card">
+        <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 8px; font-weight: 800; letter-spacing: 1px; text-align:center;">SITUATION</div>
+        <h2 id="scenario-text">Gathering evidence...</h2>
     </div>
 
+    <div id="feedback-panel">
+        <div id="fb-status" style="color: var(--neon-green); font-weight: 800; margin-bottom: 5px; text-transform: uppercase;"></div>
+        <div id="fb-content"></div>
+        <button onclick="nextCase()" style="margin-top: 12px; width: 100%; border-radius: 12px; border: none; background: var(--neon-green); color: var(--text-dark); padding: 8px; font-weight: 800; cursor: pointer;">CONTINUE</button>
+    </div>
+
+    <div id="options-grid" class="options-grid"></div>
+
+    <div id="log-drawer">
+        <div class="header">
+            <h3>SESSION LOG</h3>
+            <div onclick="toggleLog()" style="cursor:pointer; color:var(--neon-green);"><i data-lucide="x"></i></div>
+        </div>
+        <div class="stat-row">Solved: <span id="log-faced">0</span></div>
+        <div class="stat-row">Score: <span id="log-score">0</span></div>
+        <div id="logItems" style="height: 60%; overflow-y: auto; margin-top: 20px;"></div>
+    </div>
 </div>
 
 <script>
-    // FULL LIST of 100 Scenarios from your original
+    // FULL Scenarios list from your original file
     const scenarios = [
         { id:1, text:"My friend didn’t reply to my message all day.", distortion:"Mind Reading", thought:"They might be busy or distracted." },
         { id:2, text:"I failed an important exam I studied for.", distortion:"Catastrophizing", thought:"This is one setback. I can improve." },
         // ... PASTE THE REST OF YOUR 100 SCENARIOS HERE ...
     ];
 
-    const types = ["Mind Reading", "Catastrophizing", "Overgeneralization", "Emotional Reasoning", "Personalization", "Labeling", "Fortune Telling", "Black & White Thinking"];
+    const explainMap = { "Mind Reading":"Assuming others' thoughts without evidence.", "Catastrophizing":"Expecting the worst outcome.", "Overgeneralization":"One event defines everything.", "Emotional Reasoning":"Feelings = facts.", "Personalization":"Taking it personally unnecessarily.", "Labeling":"Negative identity.", "Black & White Thinking":"All or nothing thinking.", "Fortune Telling":"Predicting the future." };
 
-    let stats = {faced: 0, score: 0, startTime: new Date().toLocaleTimeString(), timer: null, timeLeft: 30 };
-
-    function launchGame() {
-        // SWAP ACTIVE SCREENS
-        document.getElementById('landing-screen').classList.remove('active');
-        document.getElementById('game-screen').classList.add('active');
-        
-        // Initialize Game
-        lucide.createIcons();
-        document.getElementById('s-start').innerText = stats.startTime;
-        nextCase(); // Launch first scenario randomly
-    }
+    let state = { faced: 0, score: 0, timer: null, timeLeft: 30, index: 0 };
 
     function nextCase() {
-        // PICK RANDOM SITUATION from the 100 scenarios list
-        clearInterval(stats.timer);
-        stats.timeLeft = 30; // Reset timer to 30s
+        clearInterval(state.timer);
+        state.timeLeft = 30; // 30s as requested
+        document.getElementById('timer-pill').innerText = state.timeLeft + "s";
         document.getElementById('feedback-panel').style.display = 'none';
         
-        const randomIdx = Math.floor(Math.random() * scenarios.length);
-        const currentCase = scenarios[randomIdx];
-        
+        const currentCase = scenarios[state.index % scenarios.length];
         document.getElementById('scenario-text').innerText = currentCase.text;
         
         const grid = document.getElementById('options-grid');
-        grid.innerHTML = ''; // Clear previous buttons
+        grid.innerHTML = '';
         
-        // Re-build option buttons
-        types.forEach(t => {
+        Object.keys(explainMap).forEach(key => {
             const btn = document.createElement('button');
             btn.className = 'opt-btn';
-            btn.innerText = t;
-            btn.onclick = () => check(t, currentCase);
+            btn.innerText = key;
+            btn.onclick = () => check(btn, key, currentCase);
             grid.appendChild(btn);
         });
         
+        lucide.createIcons(); // Initialize Icons
         startTimer();
-        stats.faced++;
+        state.index++;
     }
 
-    // CHECK logic integrated with feedback screen
-    function check(choice, currentCase) {
-        clearInterval(stats.timer);
+    function check(btn, choice, currentCase) {
+        clearInterval(state.timer);
+        state.faced++;
         
         const panel = document.getElementById('feedback-panel');
         const status = document.getElementById('fb-status');
-        const thought = document.getElementById('fb-thought');
+        const content = document.getElementById('fb-content');
 
         if(choice === currentCase.distortion) {
-            stats.score++;
-            status.innerText = "Accurate Identification";
-            thought.innerText = "Correct! Healthy Thinking: " + currentCase.thought;
+            btn.classList.add('correct');
+            state.score++;
+            status.innerText = "Target Confirmed";
+            content.innerText = "Healthy view: " + currentCase.thought;
+            log(true, currentCase.id);
         } else {
-            status.innerText = "Mistaken Trap";
-            thought.innerText = "This was Actually: " + currentCase.distortion + ". Healthy View: " + currentCase.thought;
+            btn.classList.add('wrong');
+            status.innerText = "Mistaken Identity";
+            content.innerText = "Actually " + currentCase.distortion + ": " + currentCase.thought;
+            log(false, currentCase.id);
         }
 
         panel.style.display = 'block';
-        updateUI();
+        updateStats();
     }
 
     function startTimer() {
-        stats.timer = setInterval(() => {
-            stats.timeLeft--;
-            document.getElementById('timer-pill').innerText = stats.timeLeft + "s";
-            if(stats.timeLeft <= 0) { clearInterval(stats.timer); nextCase(); }
+        state.timer = setInterval(() => {
+            state.timeLeft--;
+            document.getElementById('timer-pill').innerText = state.timeLeft + "s";
+            if(state.timeLeft <= 0) { clearInterval(state.timer); nextCase(); }
         }, 1000);
     }
 
-    function updateUI() {
-        document.getElementById('s-faced').innerText = stats.faced;
-        document.getElementById('s-correct').innerText = stats.score;
-        const acc = stats.faced > 0 ? Math.round((stats.score/stats.faced)*100) : 0;
-        document.getElementById('s-percent').innerText = acc + "%";
+    function updateStats() {
+        document.getElementById('log-faced').innerText = state.faced;
+        document.getElementById('log-score').innerText = state.score;
     }
 
-    // NEW FUNCTION: TOGGLE SCORE CARD (Replaces original Log sidebar)
-    function toggleScoreCard() {
-        const m = document.getElementById('score-card-modal');
-        m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+    function toggleLog() {
+        const drawer = document.getElementById('log-drawer');
+        drawer.classList.toggle('open');
     }
 
+    function log(ok, id){
+        let d=document.createElement("div");
+        d.style.color= ok ? "#4caf50":"#ff6b6b";
+        d.innerText="Case "+id+" - "+(ok?"Correct":"Wrong");
+        document.getElementById("logItems").prepend(d);
+    }
+
+    window.onload = nextCase;
 </script>
 </body>
 </html>
